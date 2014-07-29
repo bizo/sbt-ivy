@@ -1,4 +1,4 @@
-package com.bizo.sbtivy
+package sbtivy
 
 import java.io.{PrintWriter, FileInputStream, File}
 import java.util.Properties
