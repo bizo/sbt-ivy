@@ -1,5 +1,6 @@
 package sbtivy
 
+import sbt._, Keys._
 import java.io.{PrintWriter, FileInputStream, File}
 import java.util.Properties
 import java.util.regex.{Matcher, Pattern}
