@@ -55,6 +55,8 @@ object utils {
   }
 
   object Using {
+    import scala.language.reflectiveCalls
+
     def apply[R <: { def close(): Unit },T](create: R)(f: R => T): T = try { f(create) } finally { create.close() }
   }
 }
