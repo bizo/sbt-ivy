@@ -1,11 +1,12 @@
 package sbtivy
 
+import sbt._
 import java.io.{PrintWriter, FileInputStream, File}
 import java.util.Properties
 import java.util.regex.{Matcher, Pattern}
 import scala.io.Source
 
-object utils {
+object utils extends AutoPlugin{
   def ivyBuildSettings(projectPath: String) = {
       import utils._
 
