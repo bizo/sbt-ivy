@@ -1,13 +1,14 @@
 package sbtivy
 
-import sbt._, Keys._
 import java.io.{PrintWriter, FileInputStream, File}
 import java.util.Properties
 import java.util.regex.{Matcher, Pattern}
 import scala.io.Source
 
-object utils {
-  def ivyBuildSettings(projectPath: String) = {
+object ivyBuildSettings {
+  def apply(projectPath: String) = {
+    import utils._
+
     val ivyXmlString = Using(Source.fromFile(s"$projectPath/ivy.xml"))(_.mkString)
 
     val props = {
@@ -42,6 +43,9 @@ object utils {
       parallelExecution in Test         := false
     )
   }
+}
+
+object utils {
 
   // looks ahead/behind for '$'{' and '}' with a variable name in the middle
   final val variablePattern = """(?<=\$\{)[0-9a-zA-Z_\.]+(?=\})""".r
