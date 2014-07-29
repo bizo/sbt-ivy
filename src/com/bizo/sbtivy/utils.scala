@@ -1,3 +1,10 @@
+package com.bizo.sbtivy
+
+import java.io.{PrintWriter, FileInputStream, File}
+import java.util.Properties
+import java.util.regex.{Matcher, Pattern}
+import scala.io.Source
+
 object utils {
 
   // looks ahead/behind for '$'{' and '}' with a variable name in the middle
