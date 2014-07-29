@@ -1,49 +1,45 @@
 package sbtivy
 
-import sbt._
 import java.io.{PrintWriter, FileInputStream, File}
 import java.util.Properties
 import java.util.regex.{Matcher, Pattern}
 import scala.io.Source
 
-object utils extends AutoPlugin{
+object utils {
   def ivyBuildSettings(projectPath: String) = {
-      import utils._
+    val ivyXmlString = Using(Source.fromFile(s"$projectPath/ivy.xml"))(_.mkString)
 
-      val ivyXmlString = Using(Source.fromFile(s"$projectPath/ivy.xml"))(_.mkString)
+    val props = {
+      val commonBuildDir = readProperties(new File(s"$projectPath/project.properties"))("common.build.dir")
+      val propertiesSourcePaths = Seq(s"$commonBuildDir/project.properties", s"$commonBuildDir/build.properties", s"$projectPath/project.properties", s"$projectPath/build.properties")
+      val props_ = propertiesSourcePaths
+        .flatMap(path => readProperties(new File(path)))
+        .toMap
+      val props_withBasedir = props_ + (("basedir", projectPath))
 
-      val props = {
-        val commonBuildDir = readProperties(new File(s"$projectPath/project.properties"))("common.build.dir")
-        val propertiesSourcePaths = Seq(s"$commonBuildDir/project.properties", s"$commonBuildDir/build.properties", s"$projectPath/project.properties", s"$projectPath/build.properties")
-        val props_ = propertiesSourcePaths
-          .flatMap(path => readProperties(new File(path)))
-          .toMap
-        val props_withBasedir = props_ + (("basedir", projectPath))
+      replaceAllVariablesInProps(props_withBasedir)
 
-        replaceAllVariablesInProps(props_withBasedir)
-
-      }
-      val (ivyXmlUpdated, _) = replaceAllVariables(ivyXmlString, props)
-
-      val ivyXmlUpdatedFile = {
-        val tmpFile = File.createTempFile("ivy_updated_", ".tmp")
-        tmpFile.deleteOnExit()
-        printToFile(tmpFile)(_.print(ivyXmlUpdated))
-        tmpFile
-      }
-      println("path of updated ivy.xml: "+ivyXmlUpdatedFile.getAbsolutePath)
-
-      val buildScalaOptions = Seq("-unchecked", "-deprecation", "-encoding", "utf8")
-
-      Seq(
-        externalIvyFile(baseDirectory(_ => ivyXmlUpdatedFile)),
-        externalIvySettings(baseDirectory(_ => new File(props("common.build.dir")+"/ivyconf.xml"))),
-        scalacOptions                     := buildScalaOptions,
-        classpathConfiguration in Compile := config("default") extend config("compile"),
-        classpathConfiguration in Test    := config("sbt-test") extend(config("default"), config("compile"), config("test")),
-        parallelExecution in Test         := false
-      )
     }
+    val (ivyXmlUpdated, _) = replaceAllVariables(ivyXmlString, props)
+
+    val ivyXmlUpdatedFile = {
+      val tmpFile = File.createTempFile("ivy_updated_", ".tmp")
+      tmpFile.deleteOnExit()
+      printToFile(tmpFile)(_.print(ivyXmlUpdated))
+      tmpFile
+    }
+    println("path of updated ivy.xml: "+ivyXmlUpdatedFile.getAbsolutePath)
+
+    val buildScalaOptions = Seq("-unchecked", "-deprecation", "-encoding", "utf8")
+
+    Seq(
+      externalIvyFile(baseDirectory(_ => ivyXmlUpdatedFile)),
+      externalIvySettings(baseDirectory(_ => new File(props("common.build.dir")+"/ivyconf.xml"))),
+      scalacOptions                     := buildScalaOptions,
+      classpathConfiguration in Compile := config("default") extend config("compile"),
+      classpathConfiguration in Test    := config("sbt-test") extend(config("default"), config("compile"), config("test")),
+      parallelExecution in Test         := false
+    )
   }
 
   // looks ahead/behind for '$'{' and '}' with a variable name in the middle
