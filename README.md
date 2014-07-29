@@ -22,6 +22,7 @@ lazy val sbtivy = uri("git://github.com/matthieus/sbt-ivy/#v1.0")
 Create a sbt configuration file which can be either:
 
 - a _build.sbt_ in your project root path containing:
+
 <pre>
 import sbtivy._ // import the plugin content
 
@@ -33,6 +34,7 @@ ivyBuildSettings(".") // append the ivy specific settings to your project
 or 
 
 - a _./project/Build.scala_ containing:
+
 ```scala
 import sbt._
 import Keys._
