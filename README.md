@@ -1,55 +1,8 @@
-Plugin to use SBT to compile and run tests from a project using an Ant/Ivy build.
+The main added value of this plugin is to use properties files to replace placeholders in your _ivy.xml_ before SBT parses it.
 
-**Pre-requisites:**
+If you don't care about property placeholder replacement, you won't need this plugin. Please check [Ivy settings activation](http://www.scala-sbt.org/0.13/docs/Library-Management.html#External+Maven+or+Ivy) to know how to use ivy configuration files with SBT.
 
-- a global _ivyconf.xml_ containing Ivy settings is accessible locally.
-- the directory where to find _ivyconf.xml_ must be defined as a property in a _project.properties_ located in your project root. The file must define the property _common.build.dir_, e.g.:
-
-<pre>
-common.build.dir=/Users/me/git/common-build
-</pre>
-
-**How to use it:**
-
-Create a _plugins.sbt_ containing
-
-<pre>
-lazy val root = (project in file(".")).dependsOn(sbtivy)
-lazy val sbtivy = uri("git://github.com/matthieus/sbt-ivy/#v1.0")
-</pre>
-(binaries currently not hosted, also note the use of the tag in the url)
-
-Create a sbt configuration file which can be either:
-
-- a _build.sbt_ in your project root path containing:
-
-<pre>
-import sbtivy._ // import the plugin content
-
-name := "my-project"
-
-ivyBuildSettings(".") // append the ivy specific settings to your project
-</pre>
-
-or 
-
-- a _./project/Build.scala_ containing:
-
-```scala
-import sbt._
-import Keys._
-import sbtivy._ // import the plugin content
-
-object build extends Build {
-  lazy val myProject = Project(id = "my-project",
-                         base = file("."),
-                         settings = Defaults.defaultSettings ++ 
-                                    ivyBuildSettings(".") // append the ivy specific settings to your project
-                       )
-}
-```
-
-**Cool features:**
+**This plugin features:**
 
 - you can define properties that will replace any placeholder defined in _ivy.xml_. The placeholder has to follow the format "${variable.name}" with the value being defined in your _project.properties_ or _build.properties_ (the later overriding the former).
 - placeholders can be nested. This means that your property file (_project.properties_ or _build.properties_) can contain properties under the format
@@ -61,6 +14,58 @@ prop2=value2
 
 where "${prop1}" will resolve to "value1 - value2" in your _ivy.xml_.
 
+**Pre-requisites:**
+
+- a global _ivyconf.xml_ containing Ivy settings is accessible locally.
+- the directory where to find _ivyconf.xml_ must be defined as a property in a _project.properties_ located in your project root. The file must define the property _common.build.dir_, e.g.:
+
+<pre>
+common.build.dir=/Users/me/git/common-build
+</pre>
+
+- your _ivy.xml_ must define a "sbt-test" configuration which will extend your default, compile and test configurations.
+- \[optional\] if you use JUnit for your tests, you might want to add the [junit-interface](https://github.com/sbt/junit-interface) dependency to the "sbt-test" configuration.
+
+**How to configure SBT to compile and test your Ivy project:**
+
+To use the plugin, create a _./project/plugins.sbt_ containing
+
+<pre>
+lazy val root = (project in file(".")).dependsOn(sbtivy)
+lazy val sbtivy = uri("git://github.com/matthieus/sbt-ivy/#v1.0")
+</pre>
+(binaries currently not hosted, forks for customization encouraged)
+
+Then create a sbt configuration file which can be either:
+
+- a _build.sbt_ in your project root path containing:
+
+<pre>
+import sbtivy._ // imports the plugin content
+
+name := "my-project"
+
+ivyBuildSettings(".") // appends the ivy specific settings to your project
+</pre>
+
+or 
+
+- a _./project/Build.scala_ containing:
+
+```scala
+import sbt._
+import Keys._
+import sbtivy._ // imports the plugin content
+
+object build extends Build {
+  lazy val myProject = Project(id = "my-project",
+                         base = file("."),
+                         settings = Defaults.defaultSettings ++ 
+                                    ivyBuildSettings(".") // appends the ivy specific settings to your project
+                       )
+}
+```
+
 **SBT will now give you the ability to**
 
 - compile: useful for _~compile_, but _~test_ is more useful.
@@ -70,4 +75,18 @@ What about running the project? Untested, but it might work.
 
 **Fitting your specific needs**
 
-In case your ivy settings file is not called _ivyconf.xml_ for example, I invite you to create your own fork.
+In case your ivy settings file is not called _ivyconf.xml_ or you have a set of ivy configurations that is not default, compile and test, I invite you to create your own fork.
+
+**Bugs and Requests**
+
+Please use Github issue management tool.
+
+**License**
+
+sbt-ivy is licensed under the terms of the
+[Apache Software License v2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+
+**Copyright**
+
+Unless otherwise noted, all source files in this repository are Copyright (C) Bizo, inc.  2014
+
